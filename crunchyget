@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# Copyright (c) 2016, David Bailey <david.bailey@archlinux.net>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+# IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# Requires: youtube-dl, ffmpeg, perl-rename
+
+function error {
+  echo 'error.'
+  exit 1
+}
+
+# Include subs unless 'nosubs' is specified
+if [ "$2" != 'nosubs' ]; then
+  subs='--write-sub --sub-lang enUS'
+  mkdir -p .subtitles
+fi
+
+# Create temporary directory to prevent the script modifying other files
+# (e.g. if another instance of the script is running)
+id=".crunchyget-$(echo "$1" | grep -Eo '[0-9]{6}')"
+if [ -d $id ]; then
+  echo 'File is already being downloaded.'
+  exit 1
+fi
+
+mkdir $id
+cd $id
+
+# Download video and subtitles
+youtube-dl -o '%(title)s.%(ext)s' $subs -u "$CRUNCHYROLL_USER" -p "$CRUNCHYROLL_PASS" "$1" || error
+
+printf 'Converting video to MP4... '
+
+# Convert FLV to MP4
+for f in *.flv; do
+  ffmpeg -i "$f" -codec copy "${f%.flv}.mp4" &>/dev/null || error
+  rm "$f"
+done
+
+echo 'done.'
+
+printf 'Renaming files... '
+
+# Rename the files to remove the anime name and extension
+perl-rename 's/^.*(?=Episode.*\.(mp4|ass))//' * || error
+perl-rename 's/\.mp4$//' *.mp4
+
+# Remove '.enUS' from subtitle files
+perl-rename 's/\.enUS//' *.ass
+
+# Move files to appropriate directories
+mv *.ass ../.subtitles &>/dev/null
+mv * ..
+
+# Delete temporary directory
+cd ..
+rm -rf $id
+
+echo 'done.'
