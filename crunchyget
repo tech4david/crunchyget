@@ -27,6 +27,13 @@ if [ "$2" != 'nosubs' ]; then
   mkdir -p .subtitles
 fi
 
+# Check the rename command
+if perl-rename --help | grep 'cpan.org' &>/dev/null; then
+  rename='perl-rename'
+else
+  rename='rename'
+fi
+
 # Create temporary directory to prevent the script modifying other files
 # (e.g. if another instance of the script is running)
 id=".crunchyget-$(echo "$1" | grep -Eo '[0-9]{6}')"
@@ -54,11 +61,11 @@ echo 'done.'
 printf 'Renaming files... '
 
 # Rename the files to remove the anime name and extension
-perl-rename 's/^.*(?=Episode.*\.(mp4|ass))//' * || error
-perl-rename 's/\.mp4$//' *.mp4
+$rename 's/^.*(?=Episode.*\.(mp4|ass))//' * || error
+$rename 's/\.mp4$//' *.mp4
 
 # Remove '.enUS' from subtitle files
-perl-rename 's/\.enUS//' *.ass
+$rename 's/\.enUS//' *.ass
 
 # Move files to appropriate directories
 mv *.ass ../.subtitles &>/dev/null
