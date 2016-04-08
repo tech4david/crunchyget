@@ -8,6 +8,11 @@ without facing any problems due to multiple instances.
 
 Dependencies: [youtube-dl][1], [ffmpeg][2], [perl-rename][3]
 
+## Disclaimer
+
+This program is for personal use only, and comes with no warranty. Use at your
+own risk!
+
 [1]: https://rg3.github.io/youtube-dl/
 [2]: https://www.ffmpeg.org/
 [3]: http://search.cpan.org/~rmbarker/File-Rename/rename.PL
