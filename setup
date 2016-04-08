@@ -1,0 +1,49 @@
+#!/bin/sh
+
+if [ $EUID == 0 ]; then
+  echo "Please don't run this script as root."
+  exit 1
+fi
+
+if command -v crunchyget &>/dev/null; then
+  echo 'Crunchyget is already installed.'
+  exit 1
+fi
+
+if [ $(uname -s) == 'Linux' ]; then
+  if command -v pacman &>/dev/null; then
+    sudo pacman -S youtube-dl ffmpeg perl-rename
+  elif command -v apt-get &>/dev/null; then
+    sudo apt-get install youtube-dl ffmpeg rename
+  else
+    echo 'Suitable package manager not found.'
+    exit 1
+  fi
+elif [ $(uname -s) == 'Darwin' ]; then
+  brew='brew'
+  if command -v brew &>/dev/null; then
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    brew='/usr/local/brew'
+  fi
+  $brew install youtube-dl ffmpeg rename
+else
+  echo 'You need to be running Linux or OS X.'
+  exit 1
+fi
+
+if [ ! -f crunchyget ]; then
+  curl -o crunchyget 'https://raw.githubusercontent.com/tech4david/crunchyget/master/crunchyget'
+  rmcmd='rm crunchyget'
+fi
+chmod +x crunchyget
+
+mkdir -p ~/.local/bin
+cp crunchyget ~/.local/bin
+$rmcmd
+
+if ! (echo $PATH | grep -q '~/.local/bin' || echo $PATH | grep -q "$HOME/.local/bin"); then
+  echo 'export PATH=~/.local/bin:$PATH' >> ~/.bash_profile
+  source ~/.bash_profile
+fi
+
+echo 'Crunchyget has been installed!'

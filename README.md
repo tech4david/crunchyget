@@ -8,6 +8,11 @@ without facing any problems due to multiple instances.
 
 Dependencies: [youtube-dl][1], [ffmpeg][2], [perl-rename][3]
 
+## Quick setup
+
+    curl -o setup https://raw.githubusercontent.com/tech4david/crunchyget/master/setup
+    sh setup
+
 ## Disclaimer
 
 This program is for personal use only, and comes with no warranty. Use at your
