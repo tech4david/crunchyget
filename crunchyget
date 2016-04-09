@@ -65,7 +65,7 @@ $rename 's/^.*(?=Episode.*\.(mp4|ass))//' * || error
 $rename 's/\.mp4$//' *.mp4
 
 # Remove '.enUS' from subtitle files
-$rename 's/\.enUS//' *.ass
+$rename 's/\.enUS/.en/' *.ass
 
 # Move files to appropriate directories
 mv *.ass ../.subtitles &>/dev/null
